@@ -1,4 +1,5 @@
-﻿package com.gb.project.mcc;
+package com.gb.project.mcc;
+
 
 import org.springframework.stereotype.Component;
 import java.sql.*;
