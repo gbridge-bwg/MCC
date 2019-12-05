@@ -1,10 +1,9 @@
 ﻿package com.gb.project.mcc;
 
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestParam;
-
 import java.sql.*;
 import java.util.Map;
+
 @Component
 public class Login {
     public String login_post(Map<String, String> body){
