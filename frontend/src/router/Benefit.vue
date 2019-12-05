@@ -1,20 +1,21 @@
 <template>
-    <form class ="loginform" style="width: 100%; height: 100%;" action="/login" method="POST">
-        <fieldset class="loginset">
-            <label for="name">아이디: </label>
-            <input type="text" id="name" name="name"/>
-            <br>
-            <label for="password">비밀번호: </label>
-            <input type="password" id="password" name="password"/>
-            <input type="submit" value="전송">
-        </fieldset>
-    </form>
+    <div>
+        {{vas}}
+        <strong th:text="${vas}"></strong>
+        <strong th:text="${list}"></strong>
+    </div>
+    
 </template>
 
 <script>
-import Modal from './common/Modal.vue'
+// import Modal from './common/Modal.vue'
+import axios from 'axios'
 
 export default{
+    mounted: function(){
+        axios.get('/benefit/data') .then(res => { // 불러온 값을 Console에 뿌려줍니다. 
+        console.log(res.data) })
+    }
 //     data(){
 //         return {
 //             newTodoItem: '',
@@ -35,9 +36,9 @@ export default{
 //             this.newTodoItem = '';
 //         }
 //     },
-    components:{
-        Modal: Modal
-    }
+    // components:{
+    //     Modal: Modal
+    // }
 }
 </script>
 

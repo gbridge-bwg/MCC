@@ -1,11 +1,15 @@
 <template>
   <div id="app">
-    <Login></Login>  
+    <!-- <Login></Login>
+    <router-link to="/b">b</router-link>
+    <router-link to="/c">c</router-link> -->
+    <router-view></router-view>
   </div>
 </template>
 
 <script>
 import Login from './components/Login.vue'
+import Register from './components/Register.vue'
 
 export default {
   // 컴포넌트 등록
@@ -13,12 +17,18 @@ export default {
     'Login': Login
   }
 }
+
 </script>
 
 <style>
   body{
-      text-align: center;
-      background-color: #F6F6F8;
+    text-align: center;
+    background-color:cadetblue;
+    position:absolute;
+    top:0; left:0; bottom:0; right:0;
+    height:10%; 
+    margin:10% auto;
+
   }
   input{
       border-style: groove;

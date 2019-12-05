@@ -1,7 +1,7 @@
 <template>
-    <form class ="loginform" style="width: 100%; height: 100%;" action="/login" method="POST">
-        <fieldset class="loginset">
-            <label for="name">아이디: </label>
+    <form class ="registerform" style="width: 100%; height: 100%;" action="/register" method="POST">
+        <fieldset class="registerset">
+            <label for="name">카드 이름: </label>
             <input type="text" id="name" name="name"/>
             <br>
             <label for="password">비밀번호: </label>
