@@ -1,21 +1,12 @@
 <template>
   <div id="app">
-    <!-- <Login></Login>
-    <router-link to="/b">b</router-link>
-    <router-link to="/c">c</router-link> -->
     <router-view></router-view>
   </div>
 </template>
 
 <script>
-import Login from './components/Login.vue'
-import Register from './components/Register.vue'
-
 export default {
   // 컴포넌트 등록
-  components:{
-    'Login': Login
-  }
 }
 
 </script>

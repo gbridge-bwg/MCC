@@ -1,5 +1,5 @@
 <template>
-    <form class ="registerform" style="width: 100%; height: 100%;" action="/register" method="POST">
+    <form class ="registerform" style="width: 100%; height: 100%;" action="/admin/register" method="POST" enctype="multipart/form-data">
         <fieldset class="registerset">
             <table style="table-layout: fixed; height: 600px; margin:30px">
                 <tr>
@@ -14,10 +14,8 @@
                         <br>
                         <br>
                         <h3 style="margin-top:20px; margin-bottom:20px;">은행사 선택</h3>
-                        <div class="menubar">
-                            <select>
-                                <option>신한</option>
-                                <option>우리</option>
+                        <div class="menubar" >
+                            <select id="select1" name="selectCard">
                             </select>
                         </div>
                         <br>
@@ -31,34 +29,35 @@
                     <td>
                         <h3>혜택 분류 선택</h3>
                         <div style="margin-bottom:10px">
-                        <input type="checkbox" id="checkCaffe" name="checkCaffe" value="checkCaffe" /><label for="checkCaffe"> <span></span>카페/디저트</label>
+                        <input type="checkbox" id="checkCaffe" name="1" value="checkCaffe" /><label for="checkCaffe"> <span></span>카페/디저트</label>
                         </div>
                         <div style="margin-bottom:10px">
-                        <input type="checkbox" id="checkTrip" name="checkTrip" value="checkTrip" /><label for="checkTrip"> <span></span>여행/숙박</label>
+                        <input type="checkbox" id="checkTrip" name="2" value="checkTrip" /><label for="checkTrip"> <span></span>여행/숙박</label>
                         </div>
                         <div style="margin-bottom:10px">
-                        <input type="checkbox" id="checkMovie" name="checkMovie" value="checkMovie" /><label for="checkMovie"> <span></span>영화/문화</label>
+                        <input type="checkbox" id="checkMovie" name="3" value="checkMovie" /><label for="checkMovie"> <span></span>영화/문화</label>
                         </div>
                         <div style="margin-bottom:10px">
-                        <input type="checkbox" id="checkTraffic" name="checkTraffic" value="checkTraffic" /><label for="checkTraffic"> <span></span>교통</label>
+                        <input type="checkbox" id="checkTraffic" name="4" value="checkTraffic" /><label for="checkTraffic"> <span></span>교통</label>
                         </div>
                         <div style="margin-bottom:10px">
-                        <input type="checkbox" id="checkTel" name="checkTel" value="checkTel" /><label for="checkTel"> <span></span>통신</label>
+                        <input type="checkbox" id="checkTel" name="5" value="checkTel" /><label for="checkTel"> <span></span>통신</label>
                         </div>
                         <div style="margin-bottom:10px">
-                        <input type="checkbox" id="checkAir" name="checkAir" value="checkAir" /><label for="checkAir"> <span></span>항공</label>
+                        <input type="checkbox" id="checkAir" name="6" value="checkAir" /><label for="checkAir"> <span></span>항공</label>
                         </div>
                         <div style="margin-bottom:10px">
-                        <input type="checkbox" id="checkFood" name="checkFood" value="checkFood" /><label for="checkFood"> <span></span>음식</label>
+                        <input type="checkbox" id="checkFood" name="7" value="checkFood" /><label for="checkFood"> <span></span>음식</label>
                         </div>
                         <div style="margin-bottom:10px">
-                        <input type="checkbox" id="checkShopping" name="checkShopping" value="checkShopping" /><label for="checkShopping"> <span></span>쇼핑</label>
+                        <input type="checkbox" id="checkShopping" name="8" value="checkShopping" /><label for="checkShopping"> <span></span>쇼핑</label>
                         </div>
                         <div style="margin-bottom:10px">
-                        <input type="checkbox" id="checkHospital" name="checkHospital" value="checkHospital" /><label for="checkHospital"> <span></span>병원</label>
+                        <input type="checkbox" id="checkHospital" name="9" value="checkHospital" /><label for="checkHospital"> <span></span>병원</label>
                         </div>
                     </td>
                 </tr>
+                <tr><td colspan="2" class="head"><input type="text" id="cardDetail" name="cardDetail" placeholder="카드 상세 정보" style="width:400px; margin:30px;"/></td></tr>
                 <tr><td colspan="2" class="head"><input type="submit" value="등록"></td></tr>
             </table>
         </fieldset>
@@ -67,7 +66,19 @@
 
 <script>
     import InputFile from '../components/gb-fileupload.vue'
+    import axios from 'axios'
     export default{
+    beforeCreate: function(){
+        axios.get('/admin/register/getbank') .then(res => { // 불러온 값을 Console에 뿌려줍니다. 
+            var data = res.data;
+            for(var key in data) {
+                var op = new Option();
+                op.value = key; // 값 설정
+                op.text = data[key]; // 텍스트 설정
+                document.getElementById( "select1" ).options.add(op);
+            }
+        });
+    },
         components:{
         'gb-inputfile': InputFile
         },
@@ -93,7 +104,7 @@
         justify-content: center;
         vertical-align: middle;
         margin-top: auto;
-        margin-bottom: auto;
+         margin-bottom: 200px;/*auto; */
     }
     .registerset{
         height:auto;

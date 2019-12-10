@@ -1,70 +1,59 @@
 <template>
   <div id="app">
-    <TodoHeader></TodoHeader>
-    <TodoInput v-on:addTodo="addTodo"></TodoInput>    
-    <TodoList v-bind:propsdata="todoItems" @removeTodo="removeTodo"></TodoList>    
-    <TodoFooter v-on:removeAll="clearAll"></TodoFooter>    
+    <h2>Text Area</h2>
+    <br>
+    <gb-textarea v-bind:cols="cols" v-bind:rows="rows" v-bind:textlabel="label"></gb-textarea>
+    <br>
+    <h2>ToolTip</h2>
+    <br>
+    <gb-tooltip v-bind:tooltiptext="tooltipmessage" v-bind:origintext="message" v-bind:tooltipstyle="tooltipstyle"></gb-tooltip>
+    <br>
+    <br>
+    <br>
+    <br>
+    <h2>File Upload</h2>
+    <gb-inputfile v-bind:prolabel="labelf" v-bind:proaccept="accept" v-bind:prohint="hint" v-bind:prowidth="width"></gb-inputfile>
   </div>
 </template>
 
 <script>
-import TodoHeader from './components/TodoHeader.vue'
-import TodoInput from './components/TodoInput.vue'
-import TodoList from './components/TodoList.vue'
-import TodoFooter from './components/TodoFooter.vue'
+import TextArea from './components/gb-textarea.vue'
+import ToolTip from './components/gb-tooltip.vue'
+import InputFile from './components/gb-fileupload.vue'
 
 export default {
-  // todoItem 속성추가
-  data(){
-    return {
-      todoItems: []
-    }
-  },
-  created(){
-    if(localStorage.length>0){
-        for(var i=0;i<localStorage.length;i++){
-            this.todoItems.push(localStorage.key(i));
-        }
-    }
-  },
-  methods:{
-    addTodo(todoItem){
-      // 로컬 스토리지에 데이터를 추가하는 로직
-      localStorage.setItem(todoItem, todoItem);
-      this.todoItems.push(todoItem);
-    },
-    clearAll(){
-      localStorage.clear();
-      this.todoItems = [];
-    }, 
-    removeTodo(todoItem, index){
-      localStorage.removeItem(todoItem);
-      this.todoItems.splice(index, 1);
-    }
-  },
   // 컴포넌트 등록
   components:{
-    'TodoHeader': TodoHeader,
-    'TodoInput': TodoInput,
-    'TodoList': TodoList,
-    'TodoFooter': TodoFooter
+    'gb-textarea': TextArea,
+    'gb-tooltip': ToolTip,
+    'gb-inputfile': InputFile
+  },
+  
+  data(){
+    return{
+    cols: 50,
+    rows: 5,
+    label: "주소입력",
+    hint: '이미지 파일만 가능합니다',
+    labelf: 'file1',
+    accept: '.gif, .jpg, .png',
+    width: 'width: 100px',
+    message: "뷰를 이용한 메세지 입니다.",
+    tooltipmessage: "뷰를 이용한 툴팁 메시지 입니다.", 
+    tooltipstyle:"width: 130px; height: 35px; line-height: 35px; background: #030709; color: #fff; border: 1px solid #190508;"   
+    }
   }
+
 }
 </script>
 
-<style>
-  body{
-      text-align: center;
-      background-color: #F6F6F8;
-  }
-  input{
-      border-style: groove;
-      widows: 200px;
-  }
-  button{
-      border-style: groove;
-  }
-  .shadow{
-      box-shadow: 5px 10px 10px rgba(0,0,0,0.03);
+<style scoped>
+  gb-tooltip{
+    width: 130px;
+    height: 35px;
+    line-height: 35px;
+    background: #030709;
+    color: #fff;
+    border: 1px solid #190508;
   }
 </style>

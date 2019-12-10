@@ -6,6 +6,7 @@ import Benefit from './Benefit.vue'
 import VueSession from 'vue-session'
 
 
+
 // 뷰 어플리케이션에 라우터 플러그인을 추가한다.
 Vue.use(VueRouter)
 Vue.use(VueSession)

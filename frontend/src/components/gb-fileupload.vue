@@ -9,7 +9,7 @@
         </span>
         <span class="filebox" type="file">
             <label for="testbox">+</label>
-            <input type="file" id="testbox" v-bind:accept=proaccept @change=sub()>
+            <input type="file" id="testbox" v-bind:accept=proaccept @change=sub() name="cardImg">
         </span>
     </div>
 </template>
