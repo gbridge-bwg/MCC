@@ -4,38 +4,40 @@
             <fieldset class="benefitset">
                 <h2>MCC 카드 검색</h2>
                 <span style="margin-bottom:10px">
-                    <input type="checkbox" id="1" name="1" value="checkCaffe" /><label for="1"> <span></span>카페/디저트</label>
+                    <input type="checkbox" id="1" name="1" value="카페/디저트" /><label for="1"> <span></span>카페/디저트</label>
                 </span>
                 <span style="margin-bottom:10px">
-                    <input type="checkbox" id="2" name="2" value="checkTrip" /><label for="2"> <span></span>여행/숙박</label>
+                    <input type="checkbox" id="2" name="2" value="여행/숙박" /><label for="2"> <span></span>여행/숙박</label>
                 </span>
                 <span style="margin-bottom:10px">
-                    <input type="checkbox" id="3" name="3" value="checkMovie" /><label for="3"> <span></span>영화/문화</label>
+                    <input type="checkbox" id="3" name="3" value="영화/문화" /><label for="3"> <span></span>영화/문화</label>
                 </span>
                 <span style="margin-bottom:10px">
-                    <input type="checkbox" id="4" name="4" value="checkTraffic" /><label for="4"> <span></span>교통</label>
+                    <input type="checkbox" id="4" name="4" value="교통" /><label for="4"> <span></span>교통</label>
                 </span>
                 <br>
                 <span style="margin-bottom:10px">
-                    <input type="checkbox" id="5" name="5" value="checkTel" /><label for="5"> <span></span>통신</label>
+                    <input type="checkbox" id="5" name="5" value="통신" /><label for="5"> <span></span>통신</label>
                 </span>
                 <span style="margin-bottom:10px">
-                    <input type="checkbox" id="6" name="6" value="checkAir" /><label for="6"> <span></span>항공</label>
+                    <input type="checkbox" id="6" name="6" value="항공" /><label for="6"> <span></span>항공</label>
                 </span>
                 <span style="margin-bottom:10px">
-                    <input type="checkbox" id="7" name="7" value="checkFood" /><label for="7"> <span></span>음식</label>
+                    <input type="checkbox" id="7" name="7" value="음식" /><label for="7"> <span></span>음식</label>
                 </span>
                 <span style="margin-bottom:10px">
-                    <input type="checkbox" id="8" name="8" value="checkShopping" /><label for="8"> <span></span>쇼핑</label>
+                    <input type="checkbox" id="8" name="8" value="쇼핑" /><label for="8"> <span></span>쇼핑</label>
                 </span>
                 <span style="margin-bottom:10px">
-                    <input type="checkbox" id="9" name="9" value="checkHospital" /><label for="9"> <span></span>병원</label>
+                    <input type="checkbox" id="9" name="9" value="병원" /><label for="9"> <span></span>병원</label>
                 </span>
                 <br>
-                <input type="button" value="조회" v-on:click="getList">
+                    <input type="button" value="조회" v-on:click="getList">
+                    <input type="button" value="저장" v-on:click="saveNum">
                 <br>
+                    <!-- <cardlist :src="test_src" :bankName="test_bankName" :cardCategory="test_category" :cardDetail="test_detail" :cardName="test_catdName" :registerSrc="test_registerSrc" v-on:getData="getList"></cardlist> -->
                 <div>
-                    <cardlist v-for="(cards,index) in shots" :key="index" :src=cards.srcs :bankName=cards.bankName :cardCategory=cards.cardCategory :cardDetail=cards.cardDetail :cardName=cards.cardName></cardlist>
+                    <cardlist v-for="(cards,index) in shots" :key="index" :src=cards.srcs :bankName=cards.bankName :cardCategory=cards.cardCategory :cardDetail=cards.cardDetail :cardName=cards.cardName v-on:getData="getList"></cardlist>
                 </div>
             </fieldset>
         </form>
@@ -50,6 +52,12 @@ import cardList from '../components/cardList.vue'
 export default{
     data(){
         return{
+            test_src: '../img/card.png',
+            test_bankName: '신한',
+            test_category: '교통,통신,병원',
+            test_catdName: '나라사랑카드',
+            test_detail: '좋은 카드입니다.',
+            test_registerSrc: 'https://www.shinhancard.com/hpp/HPPCARDN/HPPCrdPttA07.shc?cd=130805_hp_crd_bn',
             shots: [],
         }
     },
@@ -57,30 +65,57 @@ export default{
     components: {
         'cardlist': cardList
     },
+    beforeMount : function() {
+        axios.get('/benefit/getSavedNum')
+        .then(response => {
+            if(response.data != ""){
+                const frm = new FormData();
+                if(response.data.toString.length != 1) {
+                    console.log('i' + response.data)
+                    var arr = response.data.split(',');
+                    arr.forEach((data, index) => {
+                        frm.append(''+data, ''+data);
+                    });
+                }
+                else{
+                    console.log('j' + response.data);
+                    frm.append(''+response.data, ''+response.data);
+                }
+                axios.post('/benefit/getNum', frm)
+                .then((response) => {
+                    var arr = response.data.split(',');
+                    arr.forEach((data, index)=>{
+                        var frm2 = new FormData();
+                        frm2.append('num', data);
+                        axios.post('/benefit/Image', frm2, { responseType: 'arraybuffer' })
+                        .then((response)=>{
+                            axios.post('/benefit/data', frm2,)
+                            .then((res)=>{
+                                let blob = new Blob([response.data],{ type: response.headers['content-type'] });
+                                let image = URL.createObjectURL(blob);
+                                this.shots.push({'srcs':image, 'cardName': res.data.cardName, 'cardCategory': res.data.cardCategory, 'bankName': res.data.bankName, 'cardDetail': res.data.cardDetail});
+                            })
+                        })
+                    });
+                })
+            }
+        });
+    },
     methods: {
         getList: function(){
+            this.shots =[];
             const frm = new FormData();
-            var chk1=document.getElementById('1').checked;
-            var chk2=document.getElementById('2').checked;
-            var chk3=document.getElementById('3').checked;
-            var chk4=document.getElementById('4').checked;
-            var chk5=document.getElementById('5').checked;
-            var chk6=document.getElementById('6').checked;
-            var chk7=document.getElementById('7').checked;
-            var chk8=document.getElementById('8').checked;
-            var chk9=document.getElementById('9').checked;
-            if(chk1){frm.append('1', '1');}
-            if(chk2){frm.append('2', '2');}
-            if(chk3){frm.append('3', '3');}
-            if(chk4){frm.append('4', '4'); console.log('check');}
-            if(chk5){frm.append('5', '5');}
-            if(chk6){frm.append('6', '6');}
-            if(chk7){frm.append('7', '7');}
-            if(chk8){frm.append('8', '8');}
-            if(chk9){frm.append('9', '9');}
-            axios.post('/benefit/getImage', frm)
+            for(var i=1; i<10; i++){
+                if(document.getElementById(''+i).checked)
+                    frm.append(''+i, ''+i);
+            }
+            axios.post('/benefit/getNum', frm)
             .then((response) => {
-                var arr = response.data.split(',');
+                var arr = new Array();
+                if(response.data.toString.length != 1)
+                    arr = response.data.split(',');
+                else
+                    arr[0] = response.data;
                 arr.forEach((data, index)=>{
                     var frm2 = new FormData();
                     frm2.append('num', data);
@@ -88,7 +123,6 @@ export default{
                     .then((response)=>{
                         axios.post('/benefit/data', frm2,)
                         .then((res)=>{
-                            console.log(res.data);
                             let blob = new Blob([response.data],{ type: response.headers['content-type'] });
                             let image = URL.createObjectURL(blob);
                             this.shots.push({'srcs':image, 'cardName': res.data.cardName, 'cardCategory': res.data.cardCategory, 'bankName': res.data.bankName, 'cardDetail': res.data.cardDetail});
@@ -97,6 +131,18 @@ export default{
                 });
             })
             
+        },
+
+        saveNum: function(){
+            const frm = new FormData();
+            for(var i=1; i<10; i++){
+                if(document.getElementById(''+i).checked)
+                    frm.append(''+i, ''+i);
+            }
+            axios.post('/benefit/saveNum', frm)
+            .then((reponse) => {
+                console.log("성공");
+            });
         }
     }
 }
@@ -148,7 +194,7 @@ export default{
     border: 3px solid #fff;
     border-radius: 5px;
     color: #fff;
-    display: block;
+    /* display: block; */
     font-size: 1em;
     font-weight: bold;
     margin: 1em auto;

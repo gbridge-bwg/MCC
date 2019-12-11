@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -34,8 +35,8 @@ public class LoginController {
         return "index";
     }
     @RequestMapping(value = "/", method = RequestMethod.POST)
-    public String login_post(@RequestParam Map<String, String> body, Model model){
-        String result = login.login_post(body);
+    public String login_post(@RequestParam Map<String, String> body, HttpSession session){
+        String result = login.login_post(body, session);
         return result;
     }
 
@@ -46,8 +47,11 @@ public class LoginController {
     }
 
     @RequestMapping(value = "/admin/register", method = RequestMethod.GET)
-    public String register_get(){
-        return "index";
+    public String register_get(HttpSession session){
+        if(session.getAttribute("userNum").equals("admin"))
+            return "index";
+        else
+            return "redirect:/";
     }
     @RequestMapping(value = "/admin/register", method = RequestMethod.POST)
     public String register_post(@RequestParam Map<String, String> body, HttpServletRequest request) throws Exception{
@@ -58,13 +62,15 @@ public class LoginController {
 
 
     @RequestMapping(value = "/benefit", method = RequestMethod.GET)
-    public String benefit_get(){
-
-        return "index";
+    public String benefit_get(HttpSession session){
+        if(session.getAttribute("userNum") != null)
+            return "index";
+        else
+            return "redirect:/";
     }
-    @RequestMapping(value = "/benefit/getImage", method = RequestMethod.POST)
+    @RequestMapping(value = "/benefit/getNum", method = RequestMethod.POST)
     @ResponseBody
-    public String benefit_getImage(@RequestParam Map<String, String> body) throws Exception{
+    public String benefit_getNum(@RequestParam Map<String, String> body) throws Exception{
 
         Connection con = null;
         String server = "localhost"; // MySQL 서버 주소
@@ -132,6 +138,106 @@ public class LoginController {
         System.out.println(obj.toString());
         System.out.println(temp);
         return temp.substring(0, temp.length()-1);
+
+    }
+
+    @RequestMapping(value = "/benefit/getSavedNum", method = RequestMethod.GET)
+    @ResponseBody
+    public String benefit_getSavedNum(@RequestParam Map<String, String> body, HttpSession session) throws Exception{
+
+        Connection con = null;
+        String server = "localhost"; // MySQL 서버 주소
+        String database = "mmc"; // MySQL DATABASE 이름
+        String user_name = "root"; //  MySQL 서버 아이디
+        String password = "dbswo1025"; // MySQL 서버 비밀번호
+        String temp = "";
+
+        // 1.드라이버 로딩
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            System.err.println(" !! <JDBC 오류> Driver load 오류: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        // 2.연결
+        try {
+            con = DriverManager.getConnection("jdbc:mysql://" + server + "/" + database + "?serverTimezone=UTC", user_name, password);
+            System.out.println("정상적으로 연결되었습니다.");
+            System.out.println(body);
+            Statement stmt = con.createStatement();
+
+            String query = "select benefitNum from savednum where userNum=" + session.getAttribute("userNum");
+            ResultSet rs = stmt.executeQuery(query);
+            while(rs.next()){
+                temp = temp+rs.getInt(1)+",";
+            }
+            rs.close();
+            stmt.close();
+        } catch(SQLException e) {
+            System.err.println("con 오류:" + e.getMessage());
+            e.printStackTrace();
+        }
+
+        // 3.해제
+        try {
+            if(con != null)
+                con.close();
+        } catch (SQLException e) {}
+        return temp.substring(0, temp.length()-1);
+    }
+
+    @RequestMapping(value = "/benefit/saveNum", method = RequestMethod.POST)
+    @ResponseBody
+    public String benefit_saveNum(@RequestParam Map<String, String> body, HttpSession session) throws Exception{
+
+        Connection con = null;
+        String server = "localhost"; // MySQL 서버 주소
+        String database = "mmc"; // MySQL DATABASE 이름
+        String user_name = "root"; //  MySQL 서버 아이디
+        String password = "dbswo1025"; // MySQL 서버 비밀번호
+
+        // 1.드라이버 로딩
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            System.err.println(" !! <JDBC 오류> Driver load 오류: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        // 2.연결
+        try {
+            con = DriverManager.getConnection("jdbc:mysql://" + server + "/" + database + "?serverTimezone=UTC", user_name, password);
+            System.out.println("정상적으로 연결되었습니다.");
+            System.out.println(body);
+            Statement stmt = con.createStatement();
+
+            String query = "select benefitNum from savednum where userNum=" + session.getAttribute("userNum");
+            ResultSet rs = stmt.executeQuery(query);
+            System.out.println(rs.getRow());
+            if(rs.next()){
+                query = "DELETE FROM savednum WHERE userNum="+session.getAttribute("userNum");
+                stmt.executeUpdate(query);
+            }
+            for(Integer i = 1; i < 10; i++){
+                if(body.get(i.toString()) != null){
+                    query = String.format("INSERT INTO savednum VALUES(%s, %s)", session.getAttribute("userNum"), body.get(i.toString()));
+                    stmt.executeUpdate(query);
+                }
+            }
+            rs.close();
+            stmt.close();
+        } catch(SQLException e) {
+            System.err.println("con 오류:" + e.getMessage());
+            e.printStackTrace();
+        }
+
+        // 3.해제
+        try {
+            if(con != null)
+                con.close();
+        } catch (SQLException e) {}
+        return "성공";
 
     }
     @RequestMapping(value = "/benefit/getCard", method = RequestMethod.POST)
@@ -212,10 +318,12 @@ public class LoginController {
             System.out.println("정상적으로 연결되었습니다.");
             Statement stmt = con.createStatement();
             String query = "SELECT benefitName FROM benefit, cardbenefit WHERE cardNum='"+body.get("num")+"' AND benefit.benefitNum = cardbenefit.benefitNum";
+            System.out.println(body.get("num") + "aa");
             ResultSet rs = stmt.executeQuery(query);
             while(rs.next()){
                 cartegory += (rs.getString(1) + ",");
             }
+            System.out.println(cartegory);
             obj.put("cardCategory", cartegory.substring(0, cartegory.length()-1));
             query = "SELECT cardName, bankName, cardDetail FROM card, bank WHERE card.bankNum = bank.bankNum AND cardNum='" + body.get("num")+"'";
             rs = stmt.executeQuery(query);

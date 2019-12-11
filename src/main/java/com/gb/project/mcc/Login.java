@@ -2,12 +2,15 @@ package com.gb.project.mcc;
 
 
 import org.springframework.stereotype.Component;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.sql.*;
 import java.util.Map;
 
 @Component
 public class Login {
-    public String login_post(Map<String, String> body){
+    public String login_post(Map<String, String> body, HttpSession session){
         Connection con = null;
         String server = "localhost"; // MySQL 서버 주소
         String database = "mmc"; // MySQL DATABASE 이름
@@ -28,21 +31,23 @@ public class Login {
             con = DriverManager.getConnection("jdbc:mysql://" + server + "/" + database + "?serverTimezone=UTC", user_name, password);
             System.out.println("정상적으로 연결되었습니다.");
             Statement stmt = con.createStatement();
-            String query = "SELECT userPassword FROM user WHERE userId='"+body.get("name")+"'";
+            String query = "SELECT userPassword, userNum FROM user WHERE userId='"+body.get("name")+"'";
             ResultSet rs = stmt.executeQuery(query);
-            while(rs.next()){
-                if(rs.getString(1).equals(body.get("password"))){
-                    if(body.get("name").equals("admin")){
+            if(rs.getRow() == 0){
+                result = "redirect:/";
+            }
+            while(rs.next()) {
+                if (rs.getString(1).equals(body.get("password"))) {
+                    if (body.get("name").equals("admin")) {
                         result = "redirect:/admin/register";
-                    }
-                    else{
+                        session.setAttribute("userNum", "admin");
+                    } else {
                         result = "redirect:/benefit";
+                        session.setAttribute("userNum", rs.getInt(2));
                     }
-                }
-                else{
+                } else {
                     result = "redirect:/";
                 }
-                //System.out.println("학생이름 : " + rs.getString(1) + " 학수번호 : " + rs.getInt(2) + " 성적 : " + rs.getString(3));
             }
             rs.close();
             stmt.close();

@@ -1,0 +1,8 @@
+# pack-refs with: peeled fully-peeled sorted 
+5abe608e2d05b90eaae3119cd5e3aad254272e51 refs/heads/dependabot/npm_and_yarn/frontend/webpack-bundle-analyzer-3.3.2
+f6494534ef560bc8e3d503faa4a68ce4ef9053df refs/heads/dependabot/npm_and_yarn/frontend/webpack-dev-server-3.1.11
+1440a6fd45d6dc0ee996762b06bf55c078c873d7 refs/heads/master
+f6494534ef560bc8e3d503faa4a68ce4ef9053df refs/pull/1/head
+f3ed5d5609ea535ffbaa026277cd3793fec0d986 refs/pull/1/merge
+5abe608e2d05b90eaae3119cd5e3aad254272e51 refs/pull/2/head
+24e2f689596e0c99f10eb6cf91a35214c76ae219 refs/pull/2/merge
