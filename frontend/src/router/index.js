@@ -4,6 +4,7 @@ import Login from './Login.vue'
 import Register from './Register.vue'
 import Benefit from './Benefit.vue'
 import VueSession from 'vue-session'
+import Tab from './Tab.vue'
 
 
 
@@ -20,7 +21,8 @@ const router = new VueRouter({
       { path: '/', component: Login },
       { path: '/admin/register', component: Register },
       { path: '*', component: NotFound },
-      { path: '/benefit', component: Benefit }
+      { path: '/benefit', component: Benefit },
+      { path: '/component', component: Tab }
     ]
   })
   

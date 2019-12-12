@@ -30,6 +30,12 @@ public class LoginController {
     @Autowired
     Benefit benefit;
 
+    @RequestMapping(value = "/logout", method = RequestMethod.GET)
+    public String logout(HttpSession session){
+        session.removeAttribute("userNum");
+        return "redirect:/";
+    }
+
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String login_get(){
         return "index";
@@ -77,10 +83,10 @@ public class LoginController {
         String database = "mmc"; // MySQL DATABASE 이름
         String user_name = "root"; //  MySQL 서버 아이디
         String password = "dbswo1025"; // MySQL 서버 비밀번호
-        String result ="";
         ArrayList arr_card = new ArrayList<>();
         JSONObject obj = new JSONObject();
         String temp = null;
+        boolean credit = false, check = false;
 
         // 1.드라이버 로딩
         try {
@@ -106,7 +112,19 @@ public class LoginController {
                     }
                 }
             }
-            String query3 = String.format("select distinct cardNum from cardbenefit where %s", temp);
+            if(body.get("credit") !=null){
+                credit = true;
+            }
+            if(body.get("check") !=null){
+                check = true;
+            }
+            String query3 = "";
+            if(credit == true && check == false)
+                query3 = String.format("select distinct cardbenefit.cardNum from cardbenefit, card where (%s) AND card.cardNum = cardbenefit.cardNum AND card.classify = 1", temp);
+            else if (credit == false && check == true)
+                query3 = String.format("select distinct cardbenefit.cardNum from cardbenefit, card where (%s) AND card.cardNum = cardbenefit.cardNum AND card.classify = 2", temp);
+            else
+                query3 = String.format("select distinct cardNum from cardbenefit where %s", temp);
             ResultSet rs = stmt.executeQuery(query3);
             temp="";
             while(rs.next()){
@@ -187,6 +205,52 @@ public class LoginController {
         return temp.substring(0, temp.length()-1);
     }
 
+    @RequestMapping(value = "/benefit/getSavedClassify", method = RequestMethod.GET)
+    @ResponseBody
+    public String benefit_getSavedClassify(@RequestParam Map<String, String> body, HttpSession session) throws Exception{
+
+        Connection con = null;
+        String server = "localhost"; // MySQL 서버 주소
+        String database = "mmc"; // MySQL DATABASE 이름
+        String user_name = "root"; //  MySQL 서버 아이디
+        String password = "dbswo1025"; // MySQL 서버 비밀번호
+        String temp = "";
+
+        // 1.드라이버 로딩
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            System.err.println(" !! <JDBC 오류> Driver load 오류: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        // 2.연결
+        try {
+            con = DriverManager.getConnection("jdbc:mysql://" + server + "/" + database + "?serverTimezone=UTC", user_name, password);
+            System.out.println("정상적으로 연결되었습니다.");
+            System.out.println(body);
+            Statement stmt = con.createStatement();
+
+            String query = "select classifyNum from savedclassify where userNum="+session.getAttribute("userNum");
+            ResultSet rs = stmt.executeQuery(query);
+            while(rs.next()){
+                temp = temp+rs.getInt(1);
+            }
+            rs.close();
+            stmt.close();
+        } catch(SQLException e) {
+            System.err.println("con 오류:" + e.getMessage());
+            e.printStackTrace();
+        }
+
+        // 3.해제
+        try {
+            if(con != null)
+                con.close();
+        } catch (SQLException e) {}
+        return temp;
+    }
+
     @RequestMapping(value = "/benefit/saveNum", method = RequestMethod.POST)
     @ResponseBody
     public String benefit_saveNum(@RequestParam Map<String, String> body, HttpSession session) throws Exception{
@@ -196,6 +260,7 @@ public class LoginController {
         String database = "mmc"; // MySQL DATABASE 이름
         String user_name = "root"; //  MySQL 서버 아이디
         String password = "dbswo1025"; // MySQL 서버 비밀번호
+        boolean credit = false, check = false;
 
         // 1.드라이버 로딩
         try {
@@ -219,6 +284,25 @@ public class LoginController {
                 query = "DELETE FROM savednum WHERE userNum="+session.getAttribute("userNum");
                 stmt.executeUpdate(query);
             }
+            query = "select userNum from savedclassify where userNum=" + session.getAttribute("userNum");
+            rs = stmt.executeQuery(query);
+            if(rs.next()){
+                query = "DELETE FROM savedclassify WHERE userNum="+session.getAttribute("userNum");
+                stmt.executeUpdate(query);
+            }
+            if(body.get("credit") !=null){
+                credit = true;
+            }
+            if(body.get("check") !=null){
+                check = true;
+            }
+            if(credit == true && check == false)
+                query = String.format("INSERT INTO savedclassify VALUES(%s, 1)", session.getAttribute("userNum"));
+            else if(credit == false && check == true)
+                query = String.format("INSERT INTO savedclassify VALUES(%s, 2)", session.getAttribute("userNum"));
+            else
+                query = String.format("INSERT INTO savedclassify VALUES(%s, 3)", session.getAttribute("userNum"));
+            stmt.executeUpdate(query);
             for(Integer i = 1; i < 10; i++){
                 if(body.get(i.toString()) != null){
                     query = String.format("INSERT INTO savednum VALUES(%s, %s)", session.getAttribute("userNum"), body.get(i.toString()));
@@ -325,12 +409,13 @@ public class LoginController {
             }
             System.out.println(cartegory);
             obj.put("cardCategory", cartegory.substring(0, cartegory.length()-1));
-            query = "SELECT cardName, bankName, cardDetail FROM card, bank WHERE card.bankNum = bank.bankNum AND cardNum='" + body.get("num")+"'";
+            query = "SELECT cardName, bankName, cardDetail, registerLink FROM card, bank WHERE card.bankNum = bank.bankNum AND cardNum='" + body.get("num")+"'";
             rs = stmt.executeQuery(query);
             while(rs.next()){
                 obj.put("cardName", rs.getString(1));
                 obj.put("bankName", rs.getString(2));
                 obj.put("cardDetail", rs.getString(3));
+                obj.put("registerLink", rs.getString(4));
             }
             rs.close();
             stmt.close();

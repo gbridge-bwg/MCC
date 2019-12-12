@@ -6,7 +6,10 @@
 
 <script>
     export default{
-        props: ['tooltiptext', 'origintext'],
+        props: {
+			tooltiptext: String, 
+			origintext: String
+			}
     }
 </script>
 

@@ -2,7 +2,15 @@
     <div>
         <form name = "form1" class ="benefitform" style="width: 100%; height: 100%;" action="/benefit/getImage" method="POST" target="param">
             <fieldset class="benefitset">
-                <h2>MCC 카드 검색</h2>
+                <h1>MCC 카드 검색</h1>
+                <span style="margin-bottom:10px">
+                    <input type="checkbox" id="credit" name="credit" value="신용카드" /><label for="credit" style="color:palevioletred; font-weight: bold;"> <span></span>신용카드</label>
+                </span>
+                <span style="margin-bottom:10px">
+                    <input type="checkbox" id="check" name="check" value="체크카드" /><label for="check" style="color:palevioletred; font-weight: bold;"> <span></span>체크카드</label>
+                </span>
+                <br>
+                <br>
                 <span style="margin-bottom:10px">
                     <input type="checkbox" id="1" name="1" value="카페/디저트" /><label for="1"> <span></span>카페/디저트</label>
                 </span>
@@ -34,10 +42,12 @@
                 <br>
                     <input type="button" value="조회" v-on:click="getList">
                     <input type="button" value="저장" v-on:click="saveNum">
+                    <input type="button" value="로그아웃" v-on:click="logout" style="background: mediumvioletred;">
+                    <gb-dialog id="dialog"></gb-dialog>
+
                 <br>
-                    <!-- <cardlist :src="test_src" :bankName="test_bankName" :cardCategory="test_category" :cardDetail="test_detail" :cardName="test_catdName" :registerSrc="test_registerSrc" v-on:getData="getList"></cardlist> -->
                 <div>
-                    <cardlist v-for="(cards,index) in shots" :key="index" :src=cards.srcs :bankName=cards.bankName :cardCategory=cards.cardCategory :cardDetail=cards.cardDetail :cardName=cards.cardName v-on:getData="getList"></cardlist>
+                    <cardlist v-for="(cards,index) in shots" :key="index" :src=cards.srcs :bankName=cards.bankName :cardCategory=cards.cardCategory :cardDetail=cards.cardDetail :cardName=cards.cardName :registerSrc=cards.registerLink v-on:getData="getList"></cardlist>
                 </div>
             </fieldset>
         </form>
@@ -46,58 +56,70 @@
 </template>
 
 <script>
-// import Modal from './common/Modal.vue'
 import axios from 'axios'
 import cardList from '../components/cardList.vue'
+import GBdialog from '../components/gb-dialog.vue'
 export default{
     data(){
         return{
-            test_src: '../img/card.png',
-            test_bankName: '신한',
-            test_category: '교통,통신,병원',
-            test_catdName: '나라사랑카드',
-            test_detail: '좋은 카드입니다.',
-            test_registerSrc: 'https://www.shinhancard.com/hpp/HPPCARDN/HPPCrdPttA07.shc?cd=130805_hp_crd_bn',
-            shots: [],
+            shots: []
         }
     },
 
     components: {
-        'cardlist': cardList
+        'cardlist': cardList,
+        'gb-dialog': GBdialog
     },
     beforeMount : function() {
         axios.get('/benefit/getSavedNum')
         .then(response => {
             if(response.data != ""){
                 const frm = new FormData();
-                if(response.data.toString.length != 1) {
-                    console.log('i' + response.data)
+                var temp = response.data+"";
+                if(temp.indexOf(',') != -1) {
                     var arr = response.data.split(',');
                     arr.forEach((data, index) => {
                         frm.append(''+data, ''+data);
                     });
                 }
                 else{
-                    console.log('j' + response.data);
                     frm.append(''+response.data, ''+response.data);
                 }
-                axios.post('/benefit/getNum', frm)
-                .then((response) => {
-                    var arr = response.data.split(',');
-                    arr.forEach((data, index)=>{
-                        var frm2 = new FormData();
-                        frm2.append('num', data);
-                        axios.post('/benefit/Image', frm2, { responseType: 'arraybuffer' })
-                        .then((response)=>{
-                            axios.post('/benefit/data', frm2,)
-                            .then((res)=>{
-                                let blob = new Blob([response.data],{ type: response.headers['content-type'] });
-                                let image = URL.createObjectURL(blob);
-                                this.shots.push({'srcs':image, 'cardName': res.data.cardName, 'cardCategory': res.data.cardCategory, 'bankName': res.data.bankName, 'cardDetail': res.data.cardDetail});
+                axios.get('/benefit/getSavedClassify').then((res)=>{
+                    console.log(res.data);
+                    if(res.data == 1)
+                        {frm.append('credit', 'credit');}
+                    else if(res.data == 2){
+                        frm.append('check', 'check');
+                    }
+                    else{
+                        frm.append('credit', 'credit');
+                        frm.append('check', 'check');
+                    }
+                    axios.post('/benefit/getNum', frm)
+                    .then((response) => {
+                        var temp = response.data+"";
+                        var arr = new Array();
+                        if(temp.indexOf(",") == -1){
+                            arr[0] = temp;
+                        }
+                        else
+                            arr = response.data.split(',');
+                        arr.forEach((data, index)=>{
+                            var frm2 = new FormData();
+                            frm2.append('num', data);
+                            axios.post('/benefit/Image', frm2, { responseType: 'arraybuffer' })
+                            .then((response)=>{
+                                axios.post('/benefit/data', frm2,)
+                                .then((res)=>{
+                                    let blob = new Blob([response.data],{ type: response.headers['content-type'] });
+                                    let image = URL.createObjectURL(blob);
+                                    this.shots.push({'srcs':image, 'cardName': res.data.cardName, 'cardCategory': res.data.cardCategory, 'bankName': res.data.bankName, 'cardDetail': res.data.cardDetail, 'registerLink': res.data.registerLink});
+                                })
                             })
-                        })
-                    });
-                })
+                        });
+                    })
+                });
             }
         });
     },
@@ -109,10 +131,15 @@ export default{
                 if(document.getElementById(''+i).checked)
                     frm.append(''+i, ''+i);
             }
+            if(document.getElementById('credit').checked)
+                frm.append('credit', 'credit');
+            if(document.getElementById('check').checked)
+                frm.append('check', 'check');
             axios.post('/benefit/getNum', frm)
             .then((response) => {
                 var arr = new Array();
-                if(response.data.toString.length != 1)
+                var temp = response.data+"";
+                if(temp.indexOf(',') != -1)
                     arr = response.data.split(',');
                 else
                     arr[0] = response.data;
@@ -125,7 +152,7 @@ export default{
                         .then((res)=>{
                             let blob = new Blob([response.data],{ type: response.headers['content-type'] });
                             let image = URL.createObjectURL(blob);
-                            this.shots.push({'srcs':image, 'cardName': res.data.cardName, 'cardCategory': res.data.cardCategory, 'bankName': res.data.bankName, 'cardDetail': res.data.cardDetail});
+                            this.shots.push({'srcs':image, 'cardName': res.data.cardName, 'cardCategory': res.data.cardCategory, 'bankName': res.data.bankName, 'cardDetail': res.data.cardDetail, 'registerLink': res.data.registerLink});
                         })
                     })
                 });
@@ -139,9 +166,19 @@ export default{
                 if(document.getElementById(''+i).checked)
                     frm.append(''+i, ''+i);
             }
+            if(document.getElementById('credit').checked)
+                frm.append('credit', 'credit');
+            if(document.getElementById('check').checked)
+                frm.append('check', 'check');
             axios.post('/benefit/saveNum', frm)
             .then((reponse) => {
-                console.log("성공");
+                document.getElementById('dialog1').click();
+            });
+        },
+
+        logout: function() {
+            axios.get('/logout').then((res)=>{
+                window.location = '/';
             });
         }
     }

@@ -1,13 +1,19 @@
 <template>
-	<div style="display:flex">
-		<label for="gbtextarea" class="textarealabel" readonly>{{textlabel}}</label>
-		<textarea class="gbtextarea" id="gbtextarea" v-bind:cols=cols v-bind:rows=rows WRAP="VIRTUAL" style="overflow:hidden"></textarea>
+	<div>
+		<div style="display:inline-flex;">
+			<label for="gbtextarea" class="textarealabel" readonly>{{textlabel}}</label>
+			<textarea class="gbtextarea" id="gbtextarea" v-bind:cols=cols v-bind:rows=rows WRAP="VIRTUAL" style="overflow:hidden"></textarea>
+		</div>
     </div>
 </template>
 
 <script>
     export default{
-        props: ['cols', 'rows', 'textlabel'],
+		props: {
+			cols: String, 
+			rows: String, 
+			textlabel: String
+		}
     }
 </script>
 
