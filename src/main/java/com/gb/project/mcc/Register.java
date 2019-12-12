@@ -120,9 +120,15 @@ public class Register {
                 outputStream.close();
                 inputStream.close();
             }
-
+            int classify = 3;
+            if(body.get("credit") !=null && body.get("check") ==null){
+                classify = 1;
+            }
+            else if(body.get("credit") ==null && body.get("check") !=null) {
+                classify = 2;
+            }
             Statement stmt = con.createStatement();
-            String query = String.format("INSERT INTO card(cardName, bankNum, carImg, cardDetail) VALUES('%s', %d, '%s', '%s')", body.get("cardName"), Integer.parseInt(body.get("selectCard")), filePathForDB, body.get("cardDetail"));
+            String query = String.format("INSERT INTO card(cardName, bankNum, carImg, cardDetail, registerLink, classify) VALUES('%s', %d, '%s', '%s', '%s', '%d')", body.get("cardName"), Integer.parseInt(body.get("selectCard")), filePathForDB, body.get("cardDetail"), body.get("registerURL"), classify);
             stmt.executeUpdate(query);
             String query2 = "SELECT MAX(cardNum) as max FROM card";
             ResultSet rs = stmt.executeQuery(query2);

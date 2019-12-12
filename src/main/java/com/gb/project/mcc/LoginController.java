@@ -356,7 +356,7 @@ public class LoginController {
             String query = "SELECT carImg FROM card WHERE cardNum='"+body.get("num")+"'";
             ResultSet rs = stmt.executeQuery(query);
             while(rs.next()){
-                File file = new File("img/"+rs.getString(1));
+                File file = new File("build"+File.separator+"libs"+File.separator+"img"+File.separator+rs.getString(1));
 //        InputStream in = getClass().getResourceAsStream("../"+result);
                 InputStream in = new FileInputStream(file);
                 result =  IOUtils.toByteArray(in);

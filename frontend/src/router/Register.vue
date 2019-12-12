@@ -12,13 +12,17 @@
                         <input type="text" id="cardName" name="cardName" placeholder="카드 이름"/>
                         <br>
                         <br>
-                        <br>
+                        <span style="margin-bottom:10px">
+                            <input type="checkbox" id="credit" name="credit" value="신용카드" /><label for="credit" style="color:palevioletred; font-weight: bold;"> <span></span>신용카드</label>
+                        </span>
+                        <span style="margin-bottom:10px">
+                            <input type="checkbox" id="check" name="check" value="체크카드" /><label for="check" style="color:palevioletred; font-weight: bold;"> <span></span>체크카드</label>
+                        </span>
                         <h3 style="margin-top:20px; margin-bottom:20px;">은행사 선택</h3>
                         <div class="menubar" >
-                            <select id="select1" name="selectCard">
+                            <select id="select1" name="selectCard" style="border-color: darkseagreen">
                             </select>
                         </div>
-                        <br>
                         <br>
                     
                         <h3>이미지 업로드</h3>
@@ -57,7 +61,8 @@
                         </div>
                     </td>
                 </tr>
-                <tr><td colspan="2" class="head"><input type="text" id="cardDetail" name="cardDetail" placeholder="카드 상세 정보" style="width:400px; margin:30px;"/></td></tr>
+                <tr><td colspan="2" class="head"><input type="text" id="cardDetail" name="cardDetail" placeholder="카드 상세 정보" style="width:400px; margin-top:30px;"/></td></tr>
+                <tr><td colspan="2" class="head"><input type="text" id="registerURL" name="registerURL" placeholder="카드 가입 주소" style="width:400px; margin:30px;"/></td></tr>
                 <tr><td colspan="2" class="head"><input type="submit" value="등록"></td></tr>
             </table>
         </fieldset>
@@ -157,6 +162,8 @@
     }
     input[type="text"], 
     input[type="password"]{
+        border-color: darkseagreen;
+        border: 1px solid darkseagreen;
         width: 180px; 
         height: auto; /* 높이 초기화 */ 
         line-height: normal; /* line-height 초기화 */ 
@@ -174,6 +181,18 @@
     padding: .5em 1.5em;
     position: relative;
     text-transform: uppercase;
+    }
+    input[type="button"] {
+    background:mediumvioletred;
+    border: 3px solid #fff;
+    border-radius: 5px;
+    color: #fff;
+    font-size: 1em;
+    font-weight: bold;
+    margin: 1em auto;
+    padding: .5em 1.5em;
+    text-transform: uppercase;
+    display: inline;
     }
 
 </style>
